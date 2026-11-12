@@ -1,0 +1,47 @@
+[27-Feb-2024 04:56:21 America/Chicago] PHP Warning:  Invalid argument supplied for foreach() in /home2/neurab2l/public_html/neuralinfo.in/ems/admin/neuralinvoice/create-expencese-categories.php on line 50
+[27-Feb-2024 04:58:07 America/Chicago] PHP Warning:  Invalid argument supplied for foreach() in /home2/neurab2l/public_html/neuralinfo.in/ems/admin/neuralinvoice/add-expencese.php on line 45
+[04-Aug-2026 04:32:08 America/Chicago] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'root'@'localhost' (using password: NO) in /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/connection.php:10
+Stack trace:
+#0 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/connection.php(10): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'neurab2l_emsDB')
+#1 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/EvaraFroentend/layout/head.php(5): include_once('/home2/neurab2l...')
+#2 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/index.php(9): include('/home2/neurab2l...')
+#3 {main}
+  thrown in /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/connection.php on line 10
+[04-Aug-2026 04:32:10 America/Chicago] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'root'@'localhost' (using password: NO) in /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/connection.php:10
+Stack trace:
+#0 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/connection.php(10): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'neurab2l_emsDB')
+#1 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/EvaraFroentend/layout/head.php(5): include_once('/home2/neurab2l...')
+#2 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/index.php(9): include('/home2/neurab2l...')
+#3 {main}
+  thrown in /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/connection.php on line 10
+[04-Aug-2026 04:32:21 America/Chicago] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'root'@'localhost' (using password: NO) in /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/connection.php:10
+Stack trace:
+#0 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/connection.php(10): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'neurab2l_emsDB')
+#1 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/EvaraFroentend/layout/head.php(5): include_once('/home2/neurab2l...')
+#2 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/index.php(9): include('/home2/neurab2l...')
+#3 {main}
+  thrown in /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/connection.php on line 10
+[04-Aug-2026 04:34:46 America/Chicago] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'neurab2l_neuralinvoice.clientmaster' doesn't exist in /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/includes/schema-bootstrap.php:70
+Stack trace:
+#0 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/includes/schema-bootstrap.php(70): mysqli->query('SHOW COLUMNS FR...')
+#1 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/connection.php(23): ni_ensure_database_schema(Object(mysqli))
+#2 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/EvaraFroentend/layout/head.php(5): include_once('/home2/neurab2l...')
+#3 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/index.php(9): include('/home2/neurab2l...')
+#4 {main}
+  thrown in /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/includes/schema-bootstrap.php on line 70
+[04-Aug-2026 04:35:07 America/Chicago] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'neurab2l_neuralinvoice.clientmaster' doesn't exist in /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/includes/schema-bootstrap.php:70
+Stack trace:
+#0 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/includes/schema-bootstrap.php(70): mysqli->query('SHOW COLUMNS FR...')
+#1 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/connection.php(23): ni_ensure_database_schema(Object(mysqli))
+#2 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/EvaraFroentend/layout/head.php(5): include_once('/home2/neurab2l...')
+#3 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/index.php(9): include('/home2/neurab2l...')
+#4 {main}
+  thrown in /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/includes/schema-bootstrap.php on line 70
+[04-Aug-2026 04:35:15 America/Chicago] PHP Fatal error:  Uncaught mysqli_sql_exception: Table 'neurab2l_neuralinvoice.clientmaster' doesn't exist in /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/includes/schema-bootstrap.php:70
+Stack trace:
+#0 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/includes/schema-bootstrap.php(70): mysqli->query('SHOW COLUMNS FR...')
+#1 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/connection.php(23): ni_ensure_database_schema(Object(mysqli))
+#2 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/EvaraFroentend/layout/head.php(5): include_once('/home2/neurab2l...')
+#3 /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/index.php(9): include('/home2/neurab2l...')
+#4 {main}
+  thrown in /home2/neurab2l/public_html/neuralinfo.in/ems/neuralinvoice/includes/schema-bootstrap.php on line 70

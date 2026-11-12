@@ -1,0 +1,30 @@
+Plan to fix `duration` showing as `Array` in client-invoice-list.php
+
+Information gathered
+- In client-invoice-list.php, Duration column prints `$invoice['duration_days']`.
+- client-invoice-list.php SQL: SELECT invoice.*, GROUP_CONCAT(workamount.description/amounts), workamount.invoiceNumber, clientmaster.ClientCode, clientmaster.ClientName
+- Query GROUP BY workamount.invoice_id. This can create multiple rows per invoice and cause unexpected values for invoice.* columns.
+- In view-invoice.php, duration_days is expected to be scalar and is rendered directly.
+- The task says Duration shows "Array", which usually happens when PHP prints an array (e.g., `$invoice['duration_days']` being array) or when query returns JSON/serialized/concatenated that is treated as array.
+
+Root cause hypothesis
+- Because of GROUP BY workamount.invoice_id with invoice.* select, MySQL may return non-deterministic values; also, if duration_days is being computed elsewhere in the request array building.
+- Another possibility: the code that builds `$invoiceData` uses explode(',', $row['descriptions']) and explode(',', $row['amounts']); but if `duration_days` is also accidentally set to the explode result due to a naming mismatch (unlikely here).
+
+Edit plan
+1) Fix SQL aggregation logic in client-invoice-list.php:
+   - Change GROUP BY to `invoice.id` (or invoice.id + invoice.ClientID) so invoice.* columns stay scalar per row.
+   - Ensure selected workamount columns are aggregated (already via GROUP_CONCAT).
+   - Remove GROUP BY workamount.invoice_id; use GROUP BY invoice.id.
+2) Add defensive rendering:
+   - In HTML: if duration_days is array, take first element; if it’s null/empty, print '-'.
+   - This prevents "Array" from ever appearing.
+3) Quick test: load client-invoice-list.php and verify Duration column is scalar.
+
+Dependent files to edit
+- client-invoice-list.php only (likely).
+
+Followup steps
+- Refresh page with existing filters and verify Duration column.
+- If still wrong, inspect invoice.duration_days stored values and type.
+

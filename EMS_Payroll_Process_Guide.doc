@@ -1,0 +1,413 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office'
+      xmlns:w='urn:schemas-microsoft-com:office:word'
+      xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+    <meta charset="utf-8">
+    <title>EMS Payroll Process &amp; Architecture Documentation (Updated)</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+        @page {
+            size: 21cm 29.7cm;
+            margin: 2cm 2cm 2cm 2cm;
+        }
+        body {
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            font-size: 11pt;
+            color: #1e293b;
+            line-height: 1.5;
+        }
+        h1 {
+            font-size: 22pt;
+            color: #0f172a;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        h2 {
+            font-size: 15pt;
+            color: #1e40af;
+            background-color: #eff6ff;
+            padding: 6px 10px;
+            border-left: 4px solid #2563eb;
+            margin-top: 22px;
+            margin-bottom: 10px;
+        }
+        h3 {
+            font-size: 12.5pt;
+            color: #0f172a;
+            margin-top: 16px;
+            margin-bottom: 6px;
+        }
+        p {
+            margin: 6px 0 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0 18px 0;
+        }
+        th {
+            background-color: #1e3a8a;
+            color: #ffffff;
+            font-weight: bold;
+            text-align: left;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 10.5pt;
+        }
+        td {
+            padding: 7px 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 10pt;
+            vertical-align: top;
+        }
+        tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+        .box {
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            padding: 12px 16px;
+            margin: 12px 0;
+        }
+        .formula-box {
+            background-color: #f0fdf4;
+            border: 1.5px solid #86efac;
+            padding: 12px 16px;
+            margin: 12px 0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 10pt;
+        }
+        .badge {
+            font-weight: bold;
+            color: #15803d;
+        }
+        .subtitle {
+            font-size: 12pt;
+            color: #475569;
+            margin-bottom: 20px;
+        }
+        ul, ol {
+            margin-top: 4px;
+            margin-bottom: 12px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>EMS PAYROLL PROCESS &amp; SYSTEM WORKFLOW (UPDATED v2.0)</h1>
+    <p class="subtitle">
+        <strong>Project:</strong> Chitragupta Employee Management System (EMS)<br>
+        <strong>Module:</strong> Employee Salary Assignment, Automated Monthly Payroll, Attendance/LWP Engine &amp; Payslip System<br>
+        <strong>Last Updated:</strong> October 2026 | <strong>Version:</strong> 2.0
+    </p>
+
+    <h2>1. Executive Overview</h2>
+    <p>
+        The EMS Payroll Module is a complete, attendance-linked salary management and disbursement system. 
+        It enables HR/Admin to assign and manage <strong>Employee Salary Structures (CTC &amp; Monthly Gross)</strong> 
+        with real-time auto-calculation, automatically syncs <strong>Daily Attendance Punches</strong>, 
+        <strong>Approved Leaves</strong>, and <strong>Public Holidays</strong>, computes <strong>Loss of Pay (LWP)</strong> 
+        and statutory deductions (PF, ESI, PT, TDS), and generates downloadable <strong>A4 PDF Payslips</strong> 
+        for both the Admin Portal and the Employee Mobile Application.
+    </p>
+
+    <h2>2. Stakeholders &amp; Responsibilities</h2>
+    <table>
+        <thead>
+            <tr>
+                <th width="20%">Role</th>
+                <th width="38%">Primary Responsibilities</th>
+                <th width="42%">System Access / Screens</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Super Admin / HR Admin</strong></td>
+                <td>
+                    <ul>
+                        <li>Add / Edit Employee Salary &amp; CTC Structure</li>
+                        <li>Configure Salary Components, Tax Slabs &amp; Rules</li>
+                        <li>Run Monthly Payroll Batch (1-Click Generator)</li>
+                        <li>Review Batch &amp; Mark Salaries as Paid with UTR</li>
+                        <li>View &amp; Download Employee Payslips</li>
+                    </ul>
+                </td>
+                <td>
+                    Admin Web Portal:<br>
+                    &bull; <code>/masters/payroll/salary-structure</code><br>
+                    &bull; <code>/masters/payroll/salary-structure/create</code><br>
+                    &bull; <code>/payroll/process</code><br>
+                    &bull; <code>/payroll/batches</code><br>
+                    &bull; <code>/payroll/payslips</code>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Supervisor / Reporting Manager</strong></td>
+                <td>
+                    <ul>
+                        <li>Monitor Team Daily Attendance</li>
+                        <li>Approve / Reject Subordinate Leave Applications before monthly payroll cut-off</li>
+                    </ul>
+                </td>
+                <td>Mobile App &amp; Supervisor APIs (<code>/api/v1/employee/supervisor/*</code>)</td>
+            </tr>
+            <tr>
+                <td><strong>Employee</strong></td>
+                <td>
+                    <ul>
+                        <li>Daily Check-In / Check-Out Attendance</li>
+                        <li>Apply for Leaves</li>
+                        <li>View Active CTC Breakdown &amp; YTD Summary</li>
+                        <li>Download Monthly Payslip PDFs</li>
+                    </ul>
+                </td>
+                <td>Employee Mobile App &amp; Self-Service APIs (<code>/api/v1/employee/payroll/*</code>)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. How to Add / Update an Employee's Salary (Admin Guide)</h2>
+    <p>Admin can assign or revise any employee's salary structure from two direct places:</p>
+    <ul>
+        <li><strong>Path 1:</strong> Admin Sidebar &rarr; <strong>Payroll</strong> &rarr; <strong>Salary Structures</strong> (<code>/masters/payroll/salary-structure</code>) &rarr; Click <strong>"Add / Assign Employee Salary"</strong>.</li>
+        <li><strong>Path 2:</strong> Admin Sidebar &rarr; <strong>Payroll</strong> &rarr; <strong>Process Payroll</strong> (<code>/payroll/process</code>) &rarr; Click <strong>"Add Employee Salary"</strong> on the top-right.</li>
+    </ul>
+
+    <h3>Step-by-Step Salary Assignment Form (<code>/masters/payroll/salary-structure/create</code>)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th width="25%">Form Section</th>
+                <th width="35%">Fields Included</th>
+                <th width="40%">Auto-Calculation / Behavior</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1. Employee &amp; Gross</strong></td>
+                <td>
+                    &bull; Select Employee Dropdown<br>
+                    &bull; Monthly Gross Salary (₹)<br>
+                    &bull; Annual CTC (₹)<br>
+                    &bull; Effective From Date
+                </td>
+                <td>
+                    Typing any amount in <strong>Monthly Gross Salary (₹)</strong> (or clicking the <em>Auto-Fill</em> button) immediately calculates all Earnings, Deductions, Net Pay, and Annual CTC in real time.
+                </td>
+            </tr>
+            <tr>
+                <td><strong>2. Monthly Earnings</strong></td>
+                <td>
+                    &bull; Basic Salary (50% of Gross)<br>
+                    &bull; HRA (25% of Gross)<br>
+                    &bull; Conveyance Allowance (₹2,000)<br>
+                    &bull; Medical Allowance (₹1,500)<br>
+                    &bull; Special Allowance (Balance)<br>
+                    &bull; Other Allowance
+                </td>
+                <td>
+                    Auto-filled based on standard Indian payroll structure, or can be manually overridden by Admin. Modifying any component automatically updates the Live Summary Banner.
+                </td>
+            </tr>
+            <tr>
+                <td><strong>3. Statutory Deductions</strong></td>
+                <td>
+                    &bull; PF Employee (12% of Basic, capped at ₹1,800)<br>
+                    &bull; PF Employer Contribution (₹1,800)<br>
+                    &bull; ESI Employee (0.75% if Gross &le; ₹21,000)<br>
+                    &bull; ESI Employer (3.25% if Gross &le; ₹21,000)<br>
+                    &bull; Professional Tax (PT - ₹200)<br>
+                    &bull; Monthly TDS / Income Tax
+                </td>
+                <td>
+                    Automatically deducts Employee PF, ESI, PT, and TDS from Monthly Gross to display <strong>Estimated Monthly In-Hand Net Salary</strong>. Employer PF &amp; ESI are added to Annual CTC.
+                </td>
+            </tr>
+            <tr>
+                <td><strong>4. Bank &amp; Statutory Info</strong></td>
+                <td>
+                    &bull; Bank Name, Account No, IFSC Code<br>
+                    &bull; Payment Mode (Bank Transfer / Cheque / Cash)<br>
+                    &bull; PAN No, UAN No, PF No, ESI No<br>
+                    &bull; Status (Active / Inactive) &amp; Remarks
+                </td>
+                <td>
+                    When saved as <strong>Active</strong>, any previous active salary structure for that employee is automatically archived as <em>Inactive</em> to maintain clean revision history.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <h2>4. End-to-End Monthly Payroll Processing Lifecycle</h2>
+
+    <h3>Stage 1: Monthly Attendance &amp; Leave Cut-Off</h3>
+    <p>At the end of the month (30th/31st):</p>
+    <ul>
+        <li>System records all employee daily check-ins from <code>employee_attendances</code>.</li>
+        <li>Supervisors complete approval of pending leave requests so approved paid leaves (<code>status = APPROVED</code>) are credited as paid days.</li>
+    </ul>
+
+    <h3>Stage 2: Running the Monthly Payroll Generator</h3>
+    <ol>
+        <li>Admin opens <strong>Payroll &rarr; Process Payroll</strong> (<code>/payroll/process</code>).</li>
+        <li>The dashboard displays 3 live counters: <strong>Active Employees</strong>, <strong>Configured Salary Structures</strong>, and <strong>Pending Structure Setup</strong>.</li>
+        <li>Admin selects the target <strong>Month</strong> and <strong>Year</strong>, adds optional batch notes, and clicks <strong>"Generate Monthly Payroll Batch"</strong>.</li>
+    </ol>
+
+    <h3>Stage 3: Automated Calculation &amp; LWP Formulas</h3>
+    <div class="formula-box">
+        <strong>1. Attendance &amp; Payable Days Formula:</strong><br>
+        &bull; Total Calendar Days = Days in Month (28 / 30 / 31)<br>
+        &bull; Working Days = Total Calendar Days - (Sundays + Public Holidays)<br>
+        &bull; Attended Days = Present Days + Approved Paid Leave Days<br>
+        &bull; Loss of Pay (LWP) Days = MAX(0, Working Days - Attended Days)<br>
+        &bull; <strong>Payable Days = Total Calendar Days - LWP Days</strong><br>
+        &bull; <strong>Payable Ratio = Payable Days / Total Calendar Days</strong><br><br>
+
+        <strong>2. Prorated Earnings Formula:</strong><br>
+        &bull; Earned Basic = Base Basic Salary &times; Payable Ratio<br>
+        &bull; Earned HRA = Base HRA &times; Payable Ratio<br>
+        &bull; Earned Conveyance = Base Conveyance &times; Payable Ratio<br>
+        &bull; Earned Medical = Base Medical &times; Payable Ratio<br>
+        &bull; Earned Special Allowance = Base Special Allowance &times; Payable Ratio<br>
+        &bull; <strong>Total Gross Earnings = Sum of Earned Components + Bonus / Incentives / Overtime</strong><br><br>
+
+        <strong>3. Deductions &amp; Net Salary Formula:</strong><br>
+        &bull; PF Deduction = Structure PF &times; Payable Ratio<br>
+        &bull; ESI Deduction = Structure ESI &times; Payable Ratio<br>
+        &bull; Professional Tax (PT) = Flat Statutory PT (₹200)<br>
+        &bull; TDS = Monthly Income Tax Deduction<br>
+        &bull; <strong>Total Deductions = PF + ESI + PT + TDS + Other Deductions</strong><br>
+        &bull; <strong>NET PAYABLE SALARY = Total Gross Earnings - Total Deductions</strong>
+    </div>
+
+    <h3>Stage 4: Batch Review, Approval &amp; Salary Disbursement</h3>
+    <ol>
+        <li>After generation, Admin lands on <strong>Batch Review</strong> (<code>/payroll/batches/{id}</code>).</li>
+        <li>Admin verifies employee-wise Payable Days, LWP Days, Earned Gross, PF, PT/TDS, and Net Salary.</li>
+        <li>Admin can download any employee's A4 PDF Payslip directly from the batch table.</li>
+        <li>Once salaries are transferred via bank, Admin clicks <strong>"Approve &amp; Mark as Paid"</strong>, enters Payment Date, Payment Mode, and Bank UTR Reference.</li>
+        <li>Batch and all associated employee payslips are updated to <strong>Paid</strong> status.</li>
+    </ol>
+
+    <h2>5. Complete Admin Sidebar Menu Reference (Payroll)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th width="26%">Sub-Menu Item</th>
+                <th width="34%">Route / URL</th>
+                <th width="40%">Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1. Process Payroll</strong></td>
+                <td><code>/payroll/process</code></td>
+                <td>Select Month &amp; Year and generate monthly payroll batch in 1 click.</td>
+            </tr>
+            <tr>
+                <td><strong>2. Payroll Batches</strong></td>
+                <td><code>/payroll/batches</code></td>
+                <td>List all monthly payroll runs, review employee breakdown &amp; mark Paid.</td>
+            </tr>
+            <tr>
+                <td><strong>3. Employee Payslips</strong></td>
+                <td><code>/payroll/payslips</code></td>
+                <td>Search &amp; filter all employee payslips by Month/Year/Name and download PDFs.</td>
+            </tr>
+            <tr>
+                <td><strong>4. Salary Structures</strong></td>
+                <td><code>/masters/payroll/salary-structure</code></td>
+                <td>List, Add, Edit, and Delete Employee CTC &amp; Monthly Gross structures.</td>
+            </tr>
+            <tr>
+                <td><strong>5. Salary Components</strong></td>
+                <td><code>/masters/payroll/salary-component</code></td>
+                <td>Configure master earning and deduction heads.</td>
+            </tr>
+            <tr>
+                <td><strong>6. Taxation Slabs</strong></td>
+                <td><code>/masters/payroll/taxation</code></td>
+                <td>Manage income tax slabs and TDS rules.</td>
+            </tr>
+            <tr>
+                <td><strong>7. Calculation Rules</strong></td>
+                <td><code>/masters/payroll/calculation-rules</code></td>
+                <td>Define percentage and formula rules for components.</td>
+            </tr>
+            <tr>
+                <td><strong>8. Payment Modes</strong></td>
+                <td><code>/masters/payroll/payment-mode</code></td>
+                <td>Manage payout modes (Bank Transfer, Cheque, Cash).</td>
+            </tr>
+            <tr>
+                <td><strong>9. Payment Frequency</strong></td>
+                <td><code>/masters/payroll/frequency</code></td>
+                <td>Configure payment cycle intervals (Monthly, Bi-Weekly).</td>
+            </tr>
+            <tr>
+                <td><strong>10. Applicability Rules</strong></td>
+                <td><code>/masters/payroll/applicability</code></td>
+                <td>Map payroll rules to specific designations or categories.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>6. Employee Mobile App REST API Endpoints</h2>
+    <p>All employee endpoints require Header: <code>Authorization: Bearer {sanctum_token}</code></p>
+    <table>
+        <thead>
+            <tr>
+                <th width="12%">Method</th>
+                <th width="43%">Endpoint</th>
+                <th width="45%">Purpose</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>GET</strong></td>
+                <td><code>/api/v1/employee/payroll/salary-structure</code></td>
+                <td>Fetch active Annual CTC, Monthly Gross, Earnings, Deductions &amp; masked Bank A/C.</td>
+            </tr>
+            <tr>
+                <td><strong>GET</strong></td>
+                <td><code>/api/v1/employee/payroll/payslips</code></td>
+                <td>List monthly payslips with dashboard summary cards (<code>?year=2026&amp;month=9</code>).</td>
+            </tr>
+            <tr>
+                <td><strong>GET</strong></td>
+                <td><code>/api/v1/employee/payroll/payslips/{id}</code></td>
+                <td>Fetch full itemized breakdown of a specific month's payslip.</td>
+            </tr>
+            <tr>
+                <td><strong>GET</strong></td>
+                <td><code>/api/v1/employee/payroll/payslips/{id}/download</code></td>
+                <td>Download A4 Portrait PDF Payslip file.</td>
+            </tr>
+            <tr>
+                <td><strong>GET</strong></td>
+                <td><code>/api/v1/employee/payroll/annual-summary</code></td>
+                <td>Fetch Year-to-Date (YTD) Gross, Net, PF, PT, TDS &amp; LWP summary for Form-16.</td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>
