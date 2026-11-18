@@ -58,11 +58,14 @@ class InvoiceController extends Controller
             ->select('c.*', 'co.CountryName', 's.StateName')
             ->orderByDesc('c.ClientID');
 
-        $statusFilter = (string) $request->input('status_filter', '');
-        if ($statusFilter === 'active') {
-            $query->where('c.DelStatus', 1);
+        $statusFilter = (string) $request->input('status_filter', 'active');
+        if ($statusFilter === 'all') {
+            // Show all (both active and inactive)
         } elseif ($statusFilter === 'inactive') {
             $query->where('c.DelStatus', 0);
+        } else {
+            // Default: active clients (DelStatus = 1)
+            $query->where('c.DelStatus', 1);
         }
 
         return $this->dataTableResponse(
@@ -153,11 +156,19 @@ class InvoiceController extends Controller
                     'ledgerUrl' => $ledgerUrl,
                 ]), ENT_QUOTES, 'UTF-8');
 
-                $actionCol = '<div class="d-flex align-items-center gap-1 justify-content-end">' .
-                    '<button type="button" class="btn btn-sm btn-icon btn-outline-info rounded-circle btn-view-client" data-client="' . $clientJson . '" title="View Details"><i class="ti ti-eye"></i></button>' .
-                    '<a href="' . e($ledgerUrl) . '" class="btn btn-sm btn-icon btn-outline-success rounded-circle" title="View Ledger"><i class="ti ti-report-money"></i></a>' .
-                    '<a href="' . e($editUrl) . '" class="btn btn-sm btn-icon btn-outline-primary rounded-circle" title="Edit Client"><i class="ti ti-edit"></i></a>' .
-                    '</div>';
+                $actionButtons = [
+                    '<button type="button" class="btn btn-sm btn-icon btn-outline-info rounded-circle btn-view-client" data-client="' . $clientJson . '" title="View Details"><i class="ti ti-eye"></i></button>',
+                    '<a href="' . e($ledgerUrl) . '" class="btn btn-sm btn-icon btn-outline-success rounded-circle" title="View Ledger"><i class="ti ti-report-money"></i></a>',
+                    '<a href="' . e($editUrl) . '" class="btn btn-sm btn-icon btn-outline-primary rounded-circle" title="Edit Client"><i class="ti ti-edit"></i></a>',
+                ];
+
+                if ($isActive) {
+                    $actionButtons[] = '<button type="button" class="btn btn-sm btn-icon btn-outline-danger rounded-circle btn-delete-client" data-id="' . $client->ClientID . '" data-name="' . e($clientName !== '' ? $clientName : 'Client #' . $client->ClientID) . '" title="Delete / Deactivate Client"><i class="ti ti-trash"></i></button>';
+                } else {
+                    $actionButtons[] = '<button type="button" class="btn btn-sm btn-icon btn-outline-success rounded-circle btn-restore-client" data-id="' . $client->ClientID . '" data-name="' . e($clientName !== '' ? $clientName : 'Client #' . $client->ClientID) . '" title="Restore / Activate Client"><i class="ti ti-rotate"></i></button>';
+                }
+
+                $actionCol = '<div class="d-flex align-items-center gap-1 justify-content-end">' . implode('', $actionButtons) . '</div>';
 
                 return [
                     'ClientID' => '<span class="badge bg-light text-secondary border font-monospace px-2 py-1 fs-12">#' . $client->ClientID . '</span>',
@@ -303,6 +314,130 @@ class InvoiceController extends Controller
         }
 
         return redirect()->route('invoice.clients')->with('success', $message);
+    }
+
+    public function destroyClient(Request $request, int $id)
+    {
+        $client = DB::table('clientmaster')->where('ClientID', $id)->first();
+        if (!$client) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Client not found.'], 404);
+            }
+            return back()->with('error', 'Client not found.');
+        }
+
+        try {
+            DB::transaction(function () use ($id, $client) {
+                DB::table('clientmaster')
+                    ->where('ClientID', $id)
+                    ->update(['DelStatus' => 0]);
+
+                if (Schema::hasTable('clients')) {
+                    $portalQuery = Client::query();
+                    $hasClause = false;
+
+                    if (Schema::hasColumn('clients', 'invoice_client_id')) {
+                        $portalQuery->where('invoice_client_id', $id);
+                        $hasClause = true;
+                    }
+
+                    $email = trim((string) ($client->EmailAddress ?? ''));
+                    if ($email !== '') {
+                        if ($hasClause) {
+                            $portalQuery->orWhere('email', $email);
+                        } else {
+                            $portalQuery->where('email', $email);
+                            $hasClause = true;
+                        }
+                    }
+
+                    if ($hasClause) {
+                        $portalQuery->update(['status' => 'Inactive']);
+                    }
+                }
+            });
+        } catch (Throwable $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to deactivate client: ' . $e->getMessage()], 500);
+            }
+            return back()->with('error', 'Failed to deactivate client: ' . $e->getMessage());
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Client deactivated (soft-deleted) successfully.',
+                'counts' => [
+                    'total' => $this->countTable('clientmaster'),
+                    'active' => $this->countTable('clientmaster', 'DelStatus = 1'),
+                    'inactive' => $this->countTable('clientmaster', 'DelStatus = 0'),
+                ],
+            ]);
+        }
+
+        return redirect()->route('invoice.clients')->with('success', 'Client deactivated (soft-deleted) successfully.');
+    }
+
+    public function restoreClient(Request $request, int $id)
+    {
+        $client = DB::table('clientmaster')->where('ClientID', $id)->first();
+        if (!$client) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Client not found.'], 404);
+            }
+            return back()->with('error', 'Client not found.');
+        }
+
+        try {
+            DB::transaction(function () use ($id, $client) {
+                DB::table('clientmaster')
+                    ->where('ClientID', $id)
+                    ->update(['DelStatus' => 1]);
+
+                if (Schema::hasTable('clients')) {
+                    $portalQuery = Client::query();
+                    $hasClause = false;
+
+                    if (Schema::hasColumn('clients', 'invoice_client_id')) {
+                        $portalQuery->where('invoice_client_id', $id);
+                        $hasClause = true;
+                    }
+
+                    $email = trim((string) ($client->EmailAddress ?? ''));
+                    if ($email !== '') {
+                        if ($hasClause) {
+                            $portalQuery->orWhere('email', $email);
+                        } else {
+                            $portalQuery->where('email', $email);
+                            $hasClause = true;
+                        }
+                    }
+
+                    if ($hasClause) {
+                        $portalQuery->update(['status' => 'Active']);
+                    }
+                }
+            });
+        } catch (Throwable $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to restore client: ' . $e->getMessage()], 500);
+            }
+            return back()->with('error', 'Failed to restore client: ' . $e->getMessage());
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Client restored successfully.',
+                'counts' => [
+                    'total' => $this->countTable('clientmaster'),
+                    'active' => $this->countTable('clientmaster', 'DelStatus = 1'),
+                    'inactive' => $this->countTable('clientmaster', 'DelStatus = 0'),
+                ],
+            ]);
+        }
+
+        return redirect()->route('invoice.clients')->with('success', 'Client restored successfully.');
     }
 
     public function companies()

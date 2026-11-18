@@ -399,6 +399,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('clients', [InvoiceController::class, 'storeClient'])->name('clients.store');
         Route::get('clients/{id}/edit', [InvoiceController::class, 'editClient'])->name('clients.edit');
         Route::put('clients/{id}', [InvoiceController::class, 'updateClient'])->name('clients.update');
+        Route::delete('clients/{id}', [InvoiceController::class, 'destroyClient'])->name('clients.destroy');
+        Route::post('clients/{id}/delete', [InvoiceController::class, 'destroyClient'])->name('clients.delete');
+        Route::post('clients/{id}/restore', [InvoiceController::class, 'restoreClient'])->name('clients.restore');
         Route::get('companies', [InvoiceController::class, 'companies'])->name('companies');
         Route::get('companies/list', [InvoiceController::class, 'companiesList'])->name('companies.list');
         Route::get('companies/create', [InvoiceController::class, 'createCompany'])->name('companies.create');

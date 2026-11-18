@@ -137,7 +137,7 @@
                 <div class="my-auto mb-2 mb-md-0">
                     <div class="d-flex align-items-center gap-2">
                         <h2 class="mb-0 fw-bold text-dark">{{ $title }}</h2>
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 fs-12">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 fs-12" id="headerTotalBadge">
                             {{ number_format($clientCounts['total'] ?? 0) }} Total
                         </span>
                     </div>
@@ -164,24 +164,12 @@
 
             <div class="row g-3 mb-3">
                 <div class="col-md-4">
-                    <div class="card stat-card active-filter h-100 mb-0" id="statCardAll" data-status="" style="--stat-theme: #0d6efd; --stat-light-bg: #eef5ff;" title="Click to view all clients">
-                        <div class="card-body py-3 d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-muted fs-13 fw-medium mb-1">Total Clients</div>
-                                <h3 class="mb-1 fw-bold text-dark">{{ number_format($totalCount) }}</h3>
-                                <span class="badge bg-light text-secondary border fs-11">All Registered</span>
-                            </div>
-                            <span class="stat-icon-wrapper"><i class="ti ti-users"></i></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card stat-card h-100 mb-0" id="statCardActive" data-status="active" style="--stat-theme: #10b981; --stat-light-bg: #ecfdf5;" title="Click to filter active clients">
+                    <div class="card stat-card active-filter h-100 mb-0" id="statCardActive" data-status="active" style="--stat-theme: #10b981; --stat-light-bg: #ecfdf5;" title="Click to filter active clients">
                         <div class="card-body py-3 d-flex align-items-center justify-content-between">
                             <div>
                                 <div class="text-muted fs-13 fw-medium mb-1">Active Clients</div>
-                                <h3 class="mb-1 fw-bold text-success">{{ number_format($activeCount) }}</h3>
-                                <span class="badge bg-success-subtle text-success border border-success-subtle fs-11">
+                                <h3 class="mb-1 fw-bold text-success" id="statActiveCount">{{ number_format($activeCount) }}</h3>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle fs-11" id="statActivePct">
                                     <i class="ti ti-trending-up me-1"></i>{{ $activePct }}% of total
                                 </span>
                             </div>
@@ -190,16 +178,28 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card stat-card h-100 mb-0" id="statCardInactive" data-status="inactive" style="--stat-theme: #ef4444; --stat-light-bg: #fef2f2;" title="Click to filter inactive clients">
+                    <div class="card stat-card h-100 mb-0" id="statCardInactive" data-status="inactive" style="--stat-theme: #ef4444; --stat-light-bg: #fef2f2;" title="Click to filter inactive / soft-deleted clients">
                         <div class="card-body py-3 d-flex align-items-center justify-content-between">
                             <div>
-                                <div class="text-muted fs-13 fw-medium mb-1">Inactive Clients</div>
-                                <h3 class="mb-1 fw-bold text-danger">{{ number_format($inactiveCount) }}</h3>
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle fs-11">
+                                <div class="text-muted fs-13 fw-medium mb-1">Inactive / Deleted</div>
+                                <h3 class="mb-1 fw-bold text-danger" id="statInactiveCount">{{ number_format($inactiveCount) }}</h3>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle fs-11" id="statInactivePct">
                                     {{ $inactivePct }}% of total
                                 </span>
                             </div>
                             <span class="stat-icon-wrapper"><i class="ti ti-user-x"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card h-100 mb-0" id="statCardAll" data-status="all" style="--stat-theme: #0d6efd; --stat-light-bg: #eef5ff;" title="Click to view all clients">
+                        <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted fs-13 fw-medium mb-1">Total Clients</div>
+                                <h3 class="mb-1 fw-bold text-dark" id="statTotalCount">{{ number_format($totalCount) }}</h3>
+                                <span class="badge bg-light text-secondary border fs-11">All Registered</span>
+                            </div>
+                            <span class="stat-icon-wrapper"><i class="ti ti-users"></i></span>
                         </div>
                     </div>
                 </div>
@@ -211,14 +211,14 @@
                     <div class="row align-items-center g-2">
                         <div class="col-md-7 d-flex flex-wrap align-items-center gap-2">
                             <span class="text-muted fs-13 fw-medium me-1"><i class="ti ti-filter me-1"></i>Filter by Status:</span>
-                            <button type="button" class="btn btn-sm btn-primary filter-pill-btn" data-filter="">
-                                All <span class="badge bg-white text-primary ms-1">{{ $totalCount }}</span>
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-success filter-pill-btn" data-filter="active">
-                                Active <span class="badge bg-success-subtle text-success ms-1">{{ $activeCount }}</span>
+                            <button type="button" class="btn btn-sm btn-success text-white filter-pill-btn" data-filter="active">
+                                Active <span class="badge bg-white text-success ms-1" id="badgeActiveCount">{{ $activeCount }}</span>
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-danger filter-pill-btn" data-filter="inactive">
-                                Inactive <span class="badge bg-danger-subtle text-danger ms-1">{{ $inactiveCount }}</span>
+                                Inactive / Deleted <span class="badge bg-danger-subtle text-danger ms-1" id="badgeInactiveCount">{{ $inactiveCount }}</span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary filter-pill-btn" data-filter="all">
+                                All <span class="badge bg-primary-subtle text-primary ms-1" id="badgeTotalCount">{{ $totalCount }}</span>
                             </button>
                         </div>
                         <div class="col-md-5 d-flex justify-content-md-end align-items-center gap-2">
@@ -246,7 +246,7 @@
                                     <th>Contact Person</th>
                                     <th>Location</th>
                                     <th style="width: 100px;">Status</th>
-                                    <th style="width: 120px;" class="text-end pe-3">Action</th>
+                                    <th style="width: 150px;" class="text-end pe-3">Action</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -330,6 +330,12 @@
                     </div>
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" id="modalDeleteBtn" style="display: none;">
+                            <i class="ti ti-trash me-1"></i>Delete Client
+                        </button>
+                        <button type="button" class="btn btn-outline-success btn-sm" id="modalRestoreBtn" style="display: none;">
+                            <i class="ti ti-rotate me-1"></i>Restore Client
+                        </button>
                         <a href="#" id="modalEditBtn" class="btn btn-primary btn-sm">
                             <i class="ti ti-edit me-1"></i>Edit Client
                         </a>
@@ -342,7 +348,7 @@
 
 @include('partials.datatable-pagination', [
     'tableId' => 'invoiceClientsList',
-    'ajaxUrl' => route('invoice.clients.list'),
+    'ajaxUrl' => route('invoice.clients.list', ['status_filter' => 'active']),
     'columns' => [
         ['data' => 'ClientID', 'name' => 'c.ClientID'],
         ['data' => 'client', 'name' => 'c.ClientName'],
@@ -358,47 +364,44 @@
 @push('after_scripts')
     <script>
         $(document).ready(function() {
-            let currentStatus = '';
+            let currentStatus = 'active';
 
             function applyStatusFilter(status) {
-                currentStatus = status;
+                currentStatus = status || 'active';
                 const table = $('#invoiceClientsList').DataTable();
                 const url = new URL('{{ route('invoice.clients.list') }}', window.location.origin);
 
-                if (status) {
-                    url.searchParams.set('status_filter', status);
-                }
-
+                url.searchParams.set('status_filter', currentStatus);
                 table.ajax.url(url.toString()).load();
 
                 // Update stat cards visual state
                 $('.stat-card').removeClass('active-filter');
-                if (status === 'active') {
-                    $('#statCardActive').addClass('active-filter');
-                } else if (status === 'inactive') {
+                if (currentStatus === 'inactive') {
                     $('#statCardInactive').addClass('active-filter');
-                } else {
+                } else if (currentStatus === 'all') {
                     $('#statCardAll').addClass('active-filter');
+                } else {
+                    $('#statCardActive').addClass('active-filter');
                 }
 
                 // Update filter pill buttons
                 $('.filter-pill-btn').each(function() {
                     const btnFilter = $(this).data('filter');
-                    if (btnFilter === status) {
-                        if (btnFilter === 'active') {
-                            $(this).removeClass('btn-outline-success').addClass('btn-success text-white');
-                        } else if (btnFilter === 'inactive') {
+                    if (btnFilter === currentStatus) {
+                        if (btnFilter === 'inactive') {
                             $(this).removeClass('btn-outline-danger').addClass('btn-danger text-white');
-                        } else {
+                        } else if (btnFilter === 'all') {
                             $(this).removeClass('btn-outline-primary').addClass('btn-primary text-white');
+                        } else {
+                            $(this).removeClass('btn-outline-success').addClass('btn-success text-white');
                         }
                     } else {
-                        if (btnFilter === 'active') {
-                            $(this).removeClass('btn-success text-white').addClass('btn-outline-success');
-                        } else if (btnFilter === 'inactive') {
+                        if (btnFilter === 'inactive') {
                             $(this).removeClass('btn-danger text-white').addClass('btn-outline-danger');
-                        } else {
+                        } else if (btnFilter === 'all') {
                             $(this).removeClass('btn-primary text-white').addClass('btn-outline-primary');
+                        } else {
+                            $(this).removeClass('btn-success text-white').addClass('btn-outline-success');
                         }
                     }
                 });
@@ -407,13 +410,13 @@
             // Stat card click filtering
             $('.stat-card').on('click', function() {
                 const status = $(this).data('status');
-                applyStatusFilter(status || '');
+                applyStatusFilter(status || 'active');
             });
 
             // Filter pills click
             $('.filter-pill-btn').on('click', function() {
                 const status = $(this).data('filter');
-                applyStatusFilter(status || '');
+                applyStatusFilter(status || 'active');
             });
 
             // Custom search input integration with DataTables
@@ -430,6 +433,177 @@
                 table.ajax.reload(function() {
                     setTimeout(() => $icon.removeClass('ti-spin'), 400);
                 });
+            });
+
+            function updateCounts(counts) {
+                if (!counts) return;
+                const total = parseInt(counts.total || 0);
+                const active = parseInt(counts.active || 0);
+                const inactive = parseInt(counts.inactive || 0);
+
+                const activePct = total > 0 ? Math.round((active / total) * 100) : 0;
+                const inactivePct = total > 0 ? Math.round((inactive / total) * 100) : 0;
+
+                $('#statTotalCount').text(total.toLocaleString());
+                $('#statActiveCount').text(active.toLocaleString());
+                $('#statInactiveCount').text(inactive.toLocaleString());
+
+                $('#badgeTotalCount').text(total.toLocaleString());
+                $('#badgeActiveCount').text(active.toLocaleString());
+                $('#badgeInactiveCount').text(inactive.toLocaleString());
+                $('#headerTotalBadge').text(total.toLocaleString() + ' Total');
+
+                $('#statActivePct').html('<i class="ti ti-trending-up me-1"></i>' + activePct + '% of total');
+                $('#statInactivePct').text(inactivePct + '% of total');
+            }
+
+            // Soft Delete confirmation & handler
+            function confirmSoftDelete(clientId, clientName) {
+                Swal.fire({
+                    title: 'Delete Client?',
+                    html: `Are you sure you want to soft-delete <strong>${$('<div>').text(clientName).html()}</strong>?<br><small class="text-muted">The client will be deactivated and hidden from the active list, while preserving existing invoices, payments, and ledger records.</small>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="ti ti-trash me-1"></i> Yes, Delete',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        confirmButton: 'btn btn-danger btn-md me-2',
+                        cancelButton: 'btn btn-secondary btn-md'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Deactivating...',
+                            text: 'Please wait',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        $.ajax({
+                            url: `{{ url('invoice/clients') }}/${clientId}`,
+                            type: 'POST',
+                            data: {
+                                _method: 'DELETE',
+                                _token: '{{ csrf_token() }}'
+                            },
+                            dataType: 'json',
+                            success: function(res) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deleted!',
+                                    text: res.message || 'Client deactivated successfully.',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                                if (res.counts) {
+                                    updateCounts(res.counts);
+                                }
+                                $('#invoiceClientsList').DataTable().ajax.reload(null, false);
+                            },
+                            error: function(xhr) {
+                                const msg = xhr.responseJSON?.message || 'Failed to delete client. Please try again.';
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: msg
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Restore confirmation & handler
+            function confirmRestore(clientId, clientName) {
+                Swal.fire({
+                    title: 'Restore Client?',
+                    html: `Are you sure you want to restore and activate <strong>${$('<div>').text(clientName).html()}</strong>?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="ti ti-rotate me-1"></i> Yes, Restore',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        confirmButton: 'btn btn-success btn-md me-2',
+                        cancelButton: 'btn btn-secondary btn-md'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Restoring...',
+                            text: 'Please wait',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        $.ajax({
+                            url: `{{ url('invoice/clients') }}/${clientId}/restore`,
+                            type: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            },
+                            dataType: 'json',
+                            success: function(res) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Restored!',
+                                    text: res.message || 'Client restored successfully.',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                                if (res.counts) {
+                                    updateCounts(res.counts);
+                                }
+                                $('#invoiceClientsList').DataTable().ajax.reload(null, false);
+                            },
+                            error: function(xhr) {
+                                const msg = xhr.responseJSON?.message || 'Failed to restore client. Please try again.';
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: msg
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Table row action events
+            $(document).on('click', '.btn-delete-client', function() {
+                const clientId = $(this).data('id');
+                const clientName = $(this).data('name') || 'this client';
+                confirmSoftDelete(clientId, clientName);
+            });
+
+            $(document).on('click', '.btn-restore-client', function() {
+                const clientId = $(this).data('id');
+                const clientName = $(this).data('name') || 'this client';
+                confirmRestore(clientId, clientName);
+            });
+
+            // Modal action button events
+            $('#modalDeleteBtn').on('click', function() {
+                const clientId = $(this).data('id');
+                const clientName = $(this).data('name') || 'this client';
+                const modalEl = document.getElementById('clientDetailsModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (modalInstance) modalInstance.hide();
+                confirmSoftDelete(clientId, clientName);
+            });
+
+            $('#modalRestoreBtn').on('click', function() {
+                const clientId = $(this).data('id');
+                const clientName = $(this).data('name') || 'this client';
+                const modalEl = document.getElementById('clientDetailsModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (modalInstance) modalInstance.hide();
+                confirmRestore(clientId, clientName);
             });
 
             // View Details Modal Trigger
@@ -454,8 +628,12 @@
 
                     if (client.status === 'Active') {
                         $('#modalClientStatus').html('<span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2 py-0.5 fs-11"><i class="ti ti-circle-filled fs-7 me-1"></i>Active</span>');
+                        $('#modalDeleteBtn').data('id', client.id).data('name', client.name).show();
+                        $('#modalRestoreBtn').hide();
                     } else {
                         $('#modalClientStatus').html('<span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-2 py-0.5 fs-11"><i class="ti ti-circle-filled fs-7 me-1"></i>Inactive</span>');
+                        $('#modalRestoreBtn').data('id', client.id).data('name', client.name).show();
+                        $('#modalDeleteBtn').hide();
                     }
 
                     $('#modalConcernPerson').text(client.person || '-');
