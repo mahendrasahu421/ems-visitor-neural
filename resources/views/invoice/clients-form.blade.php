@@ -50,12 +50,12 @@
                             <input required type="tel" name="mobile" class="form-control" value="{{ old('mobile', $client->MobileNo ?? '') }}">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Portal Password @if($isEdit)<span class="text-muted">(Optional)</span>@endif</label>
-                            <input {{ $isEdit ? '' : 'required' }} type="password" name="password" class="form-control" autocomplete="new-password">
+                            <label class="form-label">Portal Password <span class="text-muted">(Optional)</span></label>
+                            <input type="password" name="password" class="form-control" autocomplete="new-password" placeholder="Leave blank if not needed">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Confirm Password @if($isEdit)<span class="text-muted">(Optional)</span>@endif</label>
-                            <input {{ $isEdit ? '' : 'required' }} type="password" name="password_confirmation" class="form-control" autocomplete="new-password">
+                            <label class="form-label">Confirm Password <span class="text-muted">(Optional)</span></label>
+                            <input type="password" name="password_confirmation" class="form-control" autocomplete="new-password" placeholder="Leave blank if not needed">
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
                             <div class="form-check form-switch mb-2">

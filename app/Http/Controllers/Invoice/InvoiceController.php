@@ -219,8 +219,8 @@ class InvoiceController extends Controller
             return back()->withInput()->with('error', $passwordError);
         }
 
-        if (trim((string) $request->input('password', '')) === '') {
-            return back()->withInput()->with('error', 'Password is required for client portal login.');
+        if ($request->boolean('send_login_email') && trim((string) $request->input('password', '')) === '') {
+            return back()->withInput()->with('error', 'Please provide a Portal Password if you want to send portal login email.');
         }
 
         try {
@@ -232,7 +232,7 @@ class InvoiceController extends Controller
                     'ProductCategoryType' => null,
                     'CategoryType' => null,
                     'ClientCode' => '',
-                    'Priority' => null,
+                    'Priority' => '',
                     'Source' => null,
                     'client_logo' => '',
                     'pinNo' => '',

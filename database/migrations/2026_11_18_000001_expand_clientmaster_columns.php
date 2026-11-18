@@ -23,7 +23,8 @@ return new class extends Migration
                     MODIFY COLUMN `MobileNo` VARCHAR(50) NULL DEFAULT NULL,
                     MODIFY COLUMN `PhoneNo` VARCHAR(50) NULL DEFAULT NULL,
                     MODIFY COLUMN `Country` VARCHAR(100) NULL DEFAULT NULL,
-                    MODIFY COLUMN `StateID` VARCHAR(50) NULL DEFAULT NULL
+                    MODIFY COLUMN `StateID` VARCHAR(50) NULL DEFAULT NULL,
+                    MODIFY COLUMN `Priority` VARCHAR(5) NULL DEFAULT ''
             ");
         }
     }
